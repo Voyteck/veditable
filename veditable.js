@@ -6,8 +6,8 @@
  * 				voyteck0@gmail.com
  * 				http://www.inperitia.com
  * 				https://github.com/Voyteck0/veditable
- * Created:		13.06.2017
- * Version:		0.2.0
+ * Created:		14.06.2017
+ * Version:		0.2.1
  *
  * Description:
  * Plugin allows to convert inputs or form elements into inline editable elements.
