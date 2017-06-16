@@ -21,6 +21,29 @@
  * Supports built-in plugin mechanism for extending with different standard and
  * custom edit fields.
  *
+ * Events:
+ * 		performAjaxCall(event)		performs ajax call
+ * 									normally rather used to be triggered, however can be reprogrammed as needed
+ * 			event.ajax				allows to set additional $.ajax() config options - will be merged
+ * 									using $.extend(true, settings[ajax], event.ajax) with standard settings for field
+ * 		updateViewControl(event)	event is called when view control should be updated with new value
+ * 									this event should be programmed on the plugin level
+ * 									if not programmed, it is automatically updating edit with value from getValue() function
+ * 									TODO Event should be reprogrammed to editElement (this) - currently on viewElement
+ * 			event.editElement		Full edit element is provided
+ * 		updateEditControl(event)	event is called when edit control should be updated with new value
+ * 									this event can be programmer on the plugin level
+ * 									if not programmed, it is automatically updating edit with value from getValue() function
+ * 									TODO Event should be reprogrammed to editElement (this) - currently on viewElement
+ * 			event.viewElement		Full view element is provided
+ *
+ * Functions:
+ * 		getValue()					used to get the value of element that is plugined
+ * 									returns the value
+ * 									default function returns the $(element).val()
+ *
+ *
+ *
  */
 
 (function($) {
@@ -128,7 +151,6 @@
 			this.fieldSettings['ViewPanelID']	= $.veditable.getAttrOrSetting(this, 'veditable-view-panel-id', 	editType, 	settings, 	'ViewPanelID'); // TODO Implement viewPanelID
 			this.fieldSettings['EditPanelID']	= $.veditable.getAttrOrSetting(this, 'veditable-edit-panel-id',		editType,	settings,	'EditPanelID');
 
-
 			this.fieldSettings['okCallback']	= $.veditable.getAttrOrSetting(this, 'veditable-ok-callback',		editType,	settings,	'okCallback');
 			this.fieldSettings['viewCallback']	= $.veditable.getAttrOrSetting(this, 'veditable-view-callback', 	editType, 	settings,	'viewCallback');
 			this.fieldSettings['editCallback']	= $.veditable.getAttrOrSetting(this, 'veditable-edit-callback',		editType,	settings,	'editCallback'); // TODO Implement editCallback
@@ -139,6 +161,30 @@
 
 			var viewControlCallback = $.veditable.getViewControl(editType);
 			var editElement = this;
+
+			$(editElement).bind('performAjaxCall', function(event) {
+				// no callback function - standard ajax call handling
+				if (event.ajax !== undefined)
+					$.extend(true, settings['ajax'], event.ajax);
+				if (settings['ajax'] !== undefined && settings['ajax'] !== '') {
+					// ajax settings is somehow defined
+					if (settings['ajax']['url'] === undefined || settings['ajax']['url'] === '')
+						settings['ajax']['url'] = this.fieldSettings.AjaxUrl;
+				}
+				else {
+					settings['ajax']['url'] = this.fieldSettings.AjaxUrl;
+				}
+				if ((settings['ajax']['method'] === undefined || settings['ajax']['method'] === '') && this.fieldSettings.AjaxMethod)
+					settings['ajax']['method'] = this.fieldSettings.AjaxMethod;
+				settings['ajax']['data']['fieldName'] = $(this).attr('id');
+				settings['ajax']['data']['fieldValue'] = viewControl.getValue(this);
+
+				$.ajax(settings['ajax'])
+					.done(function(data) {
+						$(viewControl)
+							.trigger({type: 'updateViewControl', editElement: $(editElement)});
+					});
+			});
 
 			if (!viewControlCallback) {
 				console.log('VEditable ERROR: No correct type specified or not type specified for control: ');
@@ -249,26 +295,7 @@
 					// $('.veditable-viewControl[for="' + fieldName + '"]').trigger({type: 'updateViewControl', editElement: $('#' + fieldName)});
 				}
 				else {
-
-					// no callback function - standard ajax call handling
-					if (settings['ajax'] !== undefined && settings['ajax'] !== '') {
-						// ajax settings is somehow defined
-						if (settings['ajax']['url'] === undefined || settings['ajax']['url'] === '')
-							settings['ajax']['url'] = editElement.fieldSettings.AjaxUrl;
-					}
-					else {
-						settings['ajax']['url'] = editElement.fieldSettings.AjaxUrl;
-					}
-					if ((settings['ajax']['method'] === undefined || settings['ajax']['method'] === '') && editElement.fieldSettings.AjaxMethod)
-						settings['ajax']['method'] = editElement.fieldSettings.AjaxMethod;
-					settings['ajax']['data']['fieldName'] = $(editElement).attr('id');
-					settings['ajax']['data']['fieldValue'] = viewControl.getValue(editElement);
-
-					$.ajax(settings['ajax'])
-						.done(function(data) {
-							$(viewControl)
-								.trigger({type: 'updateViewControl', editElement: $(editElement)});
-						});
+					$(editElement).trigger('performAjaxCall');
 				}
 
 				$(viewPanel).show();

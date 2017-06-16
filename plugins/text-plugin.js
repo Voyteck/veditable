@@ -25,14 +25,12 @@
 
 	var viewControlCallback = function(object, settings) {
 		var viewControl		= $('<' + object.fieldSettings.ViewTag + '>', $.extend({
-		}, settings.textViewAttribs))
-//			.attr('id', "veditable-viewControl-" + $(object).attr('id'));
+		}, settings.textViewAttribs));
 
 		$(viewControl).bind('updateViewControl', function(event) {
 			$(this).text(event.editElement.val());
 		});
 
-//		viewControl.updateViewControl = function(editElement) { $(this).text($(editElement).val()); };
 
 		return viewControl;
 	}
