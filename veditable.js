@@ -162,6 +162,7 @@
 			
 			this.fieldSettings['okButtonSelector']		= $.veditable.getAttrOrSetting(this, 'veditable-ok-button-selector',		editType,	settings,	'okButtonSelector');
 			this.fieldSettings['cancelButtonSelector']	= $.veditable.getAttrOrSetting(this, 'veditable-cancel-button-selector',	editType,	settings,	'cancelButtonSelector');
+			this.fieldSettings['editButtonSelector']	= $.veditable.getAttrOrSetting(this, 'veditable-edit-button-selector',		editType,	settings,	'editButtonSelector');
 
 
 			var viewControlCallback = $.veditable.getViewControl(editType);
@@ -233,7 +234,7 @@
 			
 			var cancelButton;
 			if (this.fieldSettings.cancelButtonSelector === false)
-				var cancelButton =
+				cancelButton =
 					$('<' + settings.cancelButtonTag + '>', $.extend({
 						"class":	"veditable-cancelButton " + settings.cancelButtonClass,
 						"for":		$(this).attr('id'),
@@ -241,13 +242,17 @@
 			else
 				cancelButton = $(this.fieldSettings.cancelButtonSelector).addClass('veditable-cancelButton');
 
-			var editButton =
-				$('<' + settings.editButtonTag + '>', $.extend({
-					"class":	"veditable-editButton " + settings.editButtonClass,
-					"for":		$(this).attr('id'),
-				}, settings.editButtonAttribs));
+			var editButton;
+			if (!this.fieldSettings.editButtonSelector)
+				editButton =
+					$('<' + settings.editButtonTag + '>', $.extend({
+						"class":	"veditable-editButton " + settings.editButtonClass,
+						"for":		$(this).attr('id'),
+					}, settings.editButtonAttribs));
+			else
+				editButton = $(this.fieldSettings.editButtonSelector).addClass('veditable-editButton');
 
-			if($('label[for="' + $(this).attr('id') + '"]').length)
+			if($('label[for="' + $(this).attr('id') + '"]:not([veditable-editonly-element])').length)
 				var viewLabel = $('<label>')
 					.attr('for', "veditable-viewControl-" + $(this).attr('id'))
 					.addClass('veditable-viewControl-label ' + $('label[for="' + $(this).attr('id') + '"]').attr('class'))
@@ -263,8 +268,9 @@
 				.attr('id', 'veditable-viewPanel-' + $(this).attr('id'))
 				.addClass('veditable-viewPanel')
 				.append(viewControl)
-				.append(viewLabel)
-				.append(editButton);
+				.append(viewLabel);
+			if (this.fieldSettings.editButtonSelector === false)
+				viewPanel.append(editButton);
 			$(this).before(viewPanel);
 			$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 
@@ -287,7 +293,7 @@
 					$(this).after(cancelButton);
 				if (this.fieldSettings.okButtonSelector === false)
 					$(this).after(okButton);
-				editPanel.after(editPanelLabel);
+				$(this).after(editPanelLabel);
 			}
 			
 			editPanel = $(editPanelSearchString)
