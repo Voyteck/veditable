@@ -127,6 +127,8 @@
 		};
 
 		this.each(function() {
+			
+			var baseObject = this;
 
 			var settings = {};
 
@@ -264,6 +266,7 @@
 				.append(viewLabel)
 				.append(editButton);
 			$(this).before(viewPanel);
+			$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 
 
 			var editPanelLabel = $('label[for="' + $(this).attr('id') + '"]').detach();
@@ -290,23 +293,26 @@
 			editPanel = $(editPanelSearchString)
 				.addClass('veditable-editPanel')
 				.hide();
+			$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
 
 			editButton.click(function() {
 				$(viewPanel)
-					.trigger({type: 'hideViewControl', viewElement: $(viewPanel)})
 					.hide();
+				$(baseObject).trigger({type: 'hideViewControl', viewElement: $(viewPanel)});
 
 				oldValue = $(editElement).val();
 
 				$(editPanel)
-					.trigger({type: 'showEditControl', editElement: $(editPanel)})
 					.show();
+				$(baseObject).trigger({type: 'showEditControl', editElement: $(editPanel)});
 			});
+			
+			
 
 			okButton.click(function() {
 				$(editPanel)
-					.trigger({type: 'hideEditControl', editElement: $(editPanel)})
 					.hide();
+				$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
 
 				callbackFunction = editElement.fieldSettings.okCallback;
 				if ($.isFunction(callbackFunction) || $.isFunction(window[callbackFunction])) {
@@ -324,22 +330,22 @@
 				}
 
 				$(viewPanel)
-					.trigger({type: 'showViewControl', viewElement: $(viewPanel)})
 					.show();
+				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 			});
 
 			cancelButton.click(function() {
 				$(editPanel)
-					.trigger({type: 'hideEditControl', editElement: $(editPanel)})
 					.hide();
+				$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
 
 				$(editElement).val(oldValue);
 				// TODO: Works incorrectly for checkbox - should also be done via triggered event
 				$(viewControl).trigger({type: 'updateEditControl', viewElement: $(viewControl)});
 
 				$(viewPanel)
-					.trigger({type: 'showViewControl', viewElement: $(viewPanel)})
 					.show()
+				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 			});
 
 			return this;
