@@ -166,9 +166,9 @@
 
 
 			var viewControlCallback = $.veditable.getViewControl(editType);
-			var editElement = this;
+//			var editElement = this;
 
-			$(editElement).bind('performAjaxCall', function(event) {
+			$(baseObject).on('performAjaxCall', function(event) {
 				// no callback function - standard ajax call handling
 				if (event.ajax !== undefined)
 					$.extend(true, settings['ajax'], event.ajax);
@@ -191,7 +191,7 @@
 				$.ajax(settings['ajax'])
 					.done(function(data) {
 						$(viewControl)
-							.trigger({type: 'updateViewControl', editElement: $(editElement)});
+							.trigger({type: 'updateViewControl', editElement: $(baseObject)});
 					});
 			});
 
@@ -215,13 +215,12 @@
 				$(viewControl)
 					.attr('id', "veditable-viewControl-" + $(this).attr('id'))
 					.trigger({type: 'updateEditControl', viewElement: this})
-					.trigger({type: 'updateViewControl', editElement: $(editElement)})
+					.trigger({type: 'updateViewControl', editElement: $(baseObject)})
 			}
 
 			if (! $.isFunction(viewControl.getValue))
-				viewControl.getValue = function() { return $(editElement).val(); }
+				viewControl.getValue = function() { return $(baseObject).val(); }
 			
-
 			var okButton;
 			if (this.fieldSettings.okButtonSelector === false)
 				okButton =
@@ -302,59 +301,53 @@
 			$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
 
 			editButton.click(function() {
-				$(viewPanel)
-					.hide();
+				$(viewPanel).hide();
 				$(baseObject).trigger({type: 'hideViewControl', viewElement: $(viewPanel)});
 
-				oldValue = $(editElement).val();
+				oldValue = $(baseObject).val();
 
-				$(editPanel)
-					.show();
+				$(editPanel).show();
 				$(baseObject).trigger({type: 'showEditControl', editElement: $(editPanel)});
 			});
-			
-			
 
 			okButton.click(function() {
-				$(editPanel)
-					.hide();
+				$(editPanel).hide();
 				$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
 
-				callbackFunction = editElement.fieldSettings.okCallback;
+				callbackFunction = baseObject.fieldSettings.okCallback;
 				if ($.isFunction(callbackFunction) || $.isFunction(window[callbackFunction])) {
 					// callback function is doing everything
 					if($.isFunction(callbackFunction))
-						callbackFunction($(editElement).attr('id'), $(editElement).val());
+						callbackFunction($(baseObject).attr('id'), $(baseObject).val());
 					if($.isFunction(window[callbackFunction]))
-						window[callbackFunction]($(editElement).attr('id'), $(editElement).val());
+						window[callbackFunction]($(baseObject).attr('id'), $(baseObject).val());
 					// after running it should also updateview control by running updateViewControl event
 					// e.g.
 					// $('.veditable-viewControl[for="' + fieldName + '"]').trigger({type: 'updateViewControl', editElement: $('#' + fieldName)});
 				}
 				else {
-					$(editElement).trigger('performAjaxCall');
+					$(baseObject).trigger('performAjaxCall');
 				}
 
-				$(viewPanel)
-					.show();
+				$(viewPanel).show();
 				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 			});
 
 			cancelButton.click(function() {
-				$(editPanel)
-					.hide();
+				$(editPanel).hide();
 				$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
 
-				$(editElement).val(oldValue);
+				$(baseObject).val(oldValue);
 				// TODO: Works incorrectly for checkbox - should also be done via triggered event
 				$(viewControl).trigger({type: 'updateEditControl', viewElement: $(viewControl)});
 
-				$(viewPanel)
-					.show()
+				$(viewPanel).show()
 				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 			});
 
 			return this;
 		});
+		
+		$(this).trigger('initComplete');
 	};
 }(jQuery));
