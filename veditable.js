@@ -7,7 +7,7 @@
  * 				http://www.inperitia.com
  * 				https://github.com/Voyteck0/veditable
  * Created:		13.06.2017
- * Version:		0.2.3
+ * Version:		0.2.4
  *
  * Description:
  * Plugin allows to convert inputs or form elements into inline editable elements.
@@ -146,17 +146,20 @@
 
 			$(this).attr('id', $.veditable.getAttrOrSetting(this, 'id',editType,settings,'fieldName','VEditable ERROR: Neither "id" value nor "fieldName" config option set for control'));
 
-			this.fieldSettings['ViewTag'] 		= $.veditable.getAttrOrSetting(this, 'veditable-view-tag',			editType, 	settings, 	'ViewTag');
-			this.fieldSettings['ViewClass'] 	= $.veditable.getAttrOrSetting(this, 'veditable-view-class',		editType, 	settings, 	'ViewClass');
-			this.fieldSettings['ViewPanelID']	= $.veditable.getAttrOrSetting(this, 'veditable-view-panel-id', 	editType, 	settings, 	'ViewPanelID'); // TODO Implement viewPanelID
-			this.fieldSettings['EditPanelID']	= $.veditable.getAttrOrSetting(this, 'veditable-edit-panel-id',		editType,	settings,	'EditPanelID');
+			this.fieldSettings['ViewTag'] 				= $.veditable.getAttrOrSetting(this, 'veditable-view-tag',					editType, 	settings, 	'ViewTag');
+			this.fieldSettings['ViewClass'] 			= $.veditable.getAttrOrSetting(this, 'veditable-view-class',				editType, 	settings, 	'ViewClass');
+			this.fieldSettings['ViewPanelID']			= $.veditable.getAttrOrSetting(this, 'veditable-view-panel-id', 			editType, 	settings, 	'ViewPanelID'); // TODO Implement viewPanelID
+			this.fieldSettings['EditPanelID']			= $.veditable.getAttrOrSetting(this, 'veditable-edit-panel-id',				editType,	settings,	'EditPanelID');
 
-			this.fieldSettings['okCallback']	= $.veditable.getAttrOrSetting(this, 'veditable-ok-callback',		editType,	settings,	'okCallback');
-			this.fieldSettings['viewCallback']	= $.veditable.getAttrOrSetting(this, 'veditable-view-callback', 	editType, 	settings,	'viewCallback');
-			this.fieldSettings['editCallback']	= $.veditable.getAttrOrSetting(this, 'veditable-edit-callback',		editType,	settings,	'editCallback'); // TODO Implement editCallback
+			this.fieldSettings['okCallback']			= $.veditable.getAttrOrSetting(this, 'veditable-ok-callback',				editType,	settings,	'okCallback');
+			this.fieldSettings['viewCallback']			= $.veditable.getAttrOrSetting(this, 'veditable-view-callback', 			editType, 	settings,	'viewCallback');
+			this.fieldSettings['editCallback']			= $.veditable.getAttrOrSetting(this, 'veditable-edit-callback',				editType,	settings,	'editCallback'); // TODO Implement editCallback
 
-			this.fieldSettings['AjaxUrl']		= $.veditable.getAttrOrSetting(this, 'veditable-ajax-url',			editType,	settings,	'AjaxUrl');
-			this.fieldSettings['AjaxMethod']	= $.veditable.getAttrOrSetting(this, 'veditable-ajax-method', 		editType,	settings,	'AjaxMethod');
+			this.fieldSettings['AjaxUrl']				= $.veditable.getAttrOrSetting(this, 'veditable-ajax-url',					editType,	settings,	'AjaxUrl');
+			this.fieldSettings['AjaxMethod']			= $.veditable.getAttrOrSetting(this, 'veditable-ajax-method', 				editType,	settings,	'AjaxMethod');
+			
+			this.fieldSettings['okButtonSelector']		= $.veditable.getAttrOrSetting(this, 'veditable-ok-button-selector',		editType,	settings,	'okButtonSelector');
+			this.fieldSettings['cancelButtonSelector']	= $.veditable.getAttrOrSetting(this, 'veditable-cancel-button-selector',	editType,	settings,	'cancelButtonSelector');
 
 
 			var viewControlCallback = $.veditable.getViewControl(editType);
@@ -176,9 +179,12 @@
 				}
 				if ((settings['ajax']['method'] === undefined || settings['ajax']['method'] === '') && this.fieldSettings.AjaxMethod)
 					settings['ajax']['method'] = this.fieldSettings.AjaxMethod;
-				settings['ajax']['data']['fieldName'] = $(this).attr('id');
-				settings['ajax']['data']['fieldValue'] = viewControl.getValue(this);
-
+				
+				settings['ajax']['data'] = {
+					fieldName:		$(this).attr('id'),
+					fieldValue:		viewControl.getValue(this)
+				};
+				
 				$.ajax(settings['ajax'])
 					.done(function(data) {
 						$(viewControl)
@@ -211,18 +217,27 @@
 
 			if (! $.isFunction(viewControl.getValue))
 				viewControl.getValue = function() { return $(editElement).val(); }
+			
 
-			var okButton =
-				$('<' + settings.okButtonTag + '>', $.extend({
-					"class": 	"veditable-okButton " + settings.okButtonClass,
-					"for":		$(this).attr('id'),
-				}, settings.okButtonAttribs));
-
-			var cancelButton =
-				$('<' + settings.cancelButtonTag + '>', $.extend({
-					"class":	"veditable-cancelButton " + settings.cancelButtonClass,
-					"for":		$(this).attr('id'),
-				}, settings.cancelButtonAttribs));
+			var okButton;
+			if (this.fieldSettings.okButtonSelector === false)
+				okButton =
+					$('<' + settings.okButtonTag + '>', $.extend({
+						"class": 	"veditable-okButton " + settings.okButtonClass,
+						"for":		$(this).attr('id'),
+					}, settings.okButtonAttribs));
+			else
+				okButton = $(this.fieldSettings.okButtonSelector).addClass('veditable-okButton');
+			
+			var cancelButton;
+			if (this.fieldSettings.cancelButtonSelector === false)
+				var cancelButton =
+					$('<' + settings.cancelButtonTag + '>', $.extend({
+						"class":	"veditable-cancelButton " + settings.cancelButtonClass,
+						"for":		$(this).attr('id'),
+					}, settings.cancelButtonAttribs));
+			else
+				cancelButton = $(this.fieldSettings.cancelButtonSelector).addClass('veditable-cancelButton');
 
 			var editButton =
 				$('<' + settings.editButtonTag + '>', $.extend({
@@ -254,34 +269,44 @@
 			var editPanelLabel = $('label[for="' + $(this).attr('id') + '"]').detach();
 			if ($(this).attr('veditable-edit-panel-id') !== undefined) {
 				var editPanelSearchString = '#' + $(this).attr('veditable-edit-panel-id');
-				var editPanel = $(editPanelSearchString)
-					.append(this)
-					.append(cancelButton)
-					.append(okButton);
+				var editPanel = $(editPanelSearchString).append(this);
+				if (this.fieldSettings.cancelButtonSelector === false)
+					editPanel.append(cancelButton);
+				if (this.fieldSettings.okButtonSelector === false)
+					editPanel.append(okButton);
 			}
 			else {
 				var editPanel = $('<span>')
 					.attr('id', 'veditable-editPanel-' + $(this).attr('id'));
 				var editPanelSearchString = 'span#veditable-editPanel-' + $(this).attr('id');
-				$(this).wrap(editPanel)
-					.after(cancelButton)
-					.after(okButton)
-					.after(editPanelLabel);
+				$(this).wrap(editPanel);
+				if (this.fieldSettings.cancelButtonSelector === false)
+					$(this).after(cancelButton);
+				if (this.fieldSettings.okButtonSelector === false)
+					$(this).after(okButton);
+				editPanel.after(editPanelLabel);
 			}
+			
 			editPanel = $(editPanelSearchString)
 				.addClass('veditable-editPanel')
 				.hide();
 
 			editButton.click(function() {
-				$(viewPanel).hide();
+				$(viewPanel)
+					.trigger({type: 'hideViewControl', viewElement: $(viewPanel)})
+					.hide();
 
 				oldValue = $(editElement).val();
 
-				$(editPanel).show();
+				$(editPanel)
+					.trigger({type: 'showEditControl', editElement: $(editPanel)})
+					.show();
 			});
 
 			okButton.click(function() {
-				$(editPanel).hide();
+				$(editPanel)
+					.trigger({type: 'hideEditControl', editElement: $(editPanel)})
+					.hide();
 
 				callbackFunction = editElement.fieldSettings.okCallback;
 				if ($.isFunction(callbackFunction) || $.isFunction(window[callbackFunction])) {
@@ -298,17 +323,23 @@
 					$(editElement).trigger('performAjaxCall');
 				}
 
-				$(viewPanel).show();
+				$(viewPanel)
+					.trigger({type: 'showViewControl', viewElement: $(viewPanel)})
+					.show();
 			});
 
 			cancelButton.click(function() {
-				$(editPanel).hide();
+				$(editPanel)
+					.trigger({type: 'hideEditControl', editElement: $(editPanel)})
+					.hide();
 
 				$(editElement).val(oldValue);
 				// TODO: Works incorrectly for checkbox - should also be done via triggered event
 				$(viewControl).trigger({type: 'updateEditControl', viewElement: $(viewControl)});
 
-				$(viewPanel).show()
+				$(viewPanel)
+					.trigger({type: 'showViewControl', viewElement: $(viewPanel)})
+					.show()
 			});
 
 			return this;
