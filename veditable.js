@@ -98,6 +98,24 @@
 				return false;
 			}
 		},
+		
+		runtimeSettingsBindings: {
+			AjaxUrl: {
+				attrName:	'veditable-ajax-url',
+				settingKey:	'AjaxUrl'
+			},
+			AjaxMethod: {
+				attrName:	'veditable-ajax-method',
+				settingKey:	'AjaxMethod'
+			}
+		},
+		
+		getFieldSetting: function(object, settingName, elementType, settings) {
+			if (this.runtimeSettingsBindings[settingName] === undefined) {
+				console.log('Setting ' + settingName + ' is not valid or cannot be read during runtime (is initialization-only option)');
+			}
+			return this.getAttrOrSetting(object, this.runtimeSettingsBindings[settingName].attrName, elementType, settings,this.runtimeSettingsBindings[settingName].settingKey);
+		}
 
 	};
 
@@ -132,8 +150,6 @@
 
 			var settings = {};
 
-//			console.log('Creating ' + $(this).attr('id'));
-
 			var editType = $(this).attr('type');
 			if (editType == 'hidden' && $(this).attr('veditable-edit-type') !== undefined && $(this).attr('veditable-edit-type') != '')
 				editType = $(this).attr('veditable-edit-type');
@@ -156,17 +172,16 @@
 			this.fieldSettings['okCallback']			= $.veditable.getAttrOrSetting(this, 'veditable-ok-callback',				editType,	settings,	'okCallback');
 			this.fieldSettings['viewCallback']			= $.veditable.getAttrOrSetting(this, 'veditable-view-callback', 			editType, 	settings,	'viewCallback');
 			this.fieldSettings['editCallback']			= $.veditable.getAttrOrSetting(this, 'veditable-edit-callback',				editType,	settings,	'editCallback'); // TODO Implement editCallback
-
-			this.fieldSettings['AjaxUrl']				= $.veditable.getAttrOrSetting(this, 'veditable-ajax-url',					editType,	settings,	'AjaxUrl');
-			this.fieldSettings['AjaxMethod']			= $.veditable.getAttrOrSetting(this, 'veditable-ajax-method', 				editType,	settings,	'AjaxMethod');
 			
 			this.fieldSettings['okButtonSelector']		= $.veditable.getAttrOrSetting(this, 'veditable-ok-button-selector',		editType,	settings,	'okButtonSelector');
 			this.fieldSettings['cancelButtonSelector']	= $.veditable.getAttrOrSetting(this, 'veditable-cancel-button-selector',	editType,	settings,	'cancelButtonSelector');
 			this.fieldSettings['editButtonSelector']	= $.veditable.getAttrOrSetting(this, 'veditable-edit-button-selector',		editType,	settings,	'editButtonSelector');
+			
+			this.fieldSettings['AjaxUrl']				= $.veditable.getFieldSetting(this, 'AjaxUrl', 		editType, settings);
+			this.fieldSettings['AjaxMethod']			= $.veditable.getFieldSetting(this, 'AjaxMethod', 	editType, settings);
 
 
 			var viewControlCallback = $.veditable.getViewControl(editType);
-//			var editElement = this;
 
 			$(baseObject).on('performAjaxCall', function(event) {
 				// no callback function - standard ajax call handling
@@ -175,13 +190,13 @@
 				if (settings['ajax'] !== undefined && settings['ajax'] !== '') {
 					// ajax settings is somehow defined
 					if (settings['ajax']['url'] === undefined || settings['ajax']['url'] === '')
-						settings['ajax']['url'] = this.fieldSettings.AjaxUrl;
+						settings['ajax']['url'] = $.veditable.getFieldSetting(this, 'AjaxUrl', editType, settings);
 				}
 				else {
-					settings['ajax']['url'] = this.fieldSettings.AjaxUrl;
+					settings['ajax']['url'] = $.veditable.getFieldSetting(this, 'AjaxUrl', editType, settings);
 				}
-				if ((settings['ajax']['method'] === undefined || settings['ajax']['method'] === '') && this.fieldSettings.AjaxMethod)
-					settings['ajax']['method'] = this.fieldSettings.AjaxMethod;
+				if ((settings['ajax']['method'] === undefined || settings['ajax']['method'] === '') && $.veditable.getFieldSetting(this, 'AjaxMethod', editType, settings))
+					settings['ajax']['method'] = $.veditable.getFieldSetting(this, 'AjaxMethod', editType, settings);
 				
 				settings['ajax']['data'] = {
 					fieldName:		$(this).attr('id'),
@@ -205,21 +220,22 @@
 
 				var viewCallbackFunction = this.fieldSettings['viewCallback'];
 				if ($.isFunction(viewCallbackFunction) || $.isFunction(window[viewCallbackFunction])) {
-					$(viewControl).unbind('updateViewControl');
+					$(viewControl).off('updateViewControl');
 					if($.isFunction(viewCallbackFunction))
-						$(viewControl).bind('updateViewControl', function(event) { $(this).html(viewCallbackFunction(event)); });
+						$(viewControl).on('updateViewControl', function(event) { $(this).html(viewCallbackFunction(event)); });
 					if($.isFunction(window[viewCallbackFunction]))
-						$(viewControl).bind('updateViewControl', function(event) { $(this).html(window[viewCallbackFunction](event)); });
+						$(viewControl).on('updateViewControl', function(event) { $(this).html(window[viewCallbackFunction](event)); });
 				}
 
 				$(viewControl)
 					.attr('id', "veditable-viewControl-" + $(this).attr('id'))
-					.trigger({type: 'updateEditControl', viewElement: this})
+					.trigger({type: 'updateEditControl', viewElement: $(baseObject)})
 					.trigger({type: 'updateViewControl', editElement: $(baseObject)})
 			}
 
 			if (! $.isFunction(viewControl.getValue))
 				viewControl.getValue = function() { return $(baseObject).val(); }
+
 			
 			var okButton;
 			if (this.fieldSettings.okButtonSelector === false)
@@ -228,8 +244,11 @@
 						"class": 	"veditable-okButton " + settings.okButtonClass,
 						"for":		$(this).attr('id'),
 					}, settings.okButtonAttribs));
-			else
+			else {
 				okButton = $(this.fieldSettings.okButtonSelector).addClass('veditable-okButton');
+				$(this).on('hideEditControl', function(event) { $(okButton).hide(); });
+				$(this).on('showEditControl', function(event) { $(okButton).show(); });
+			}
 			
 			var cancelButton;
 			if (this.fieldSettings.cancelButtonSelector === false)
@@ -238,8 +257,11 @@
 						"class":	"veditable-cancelButton " + settings.cancelButtonClass,
 						"for":		$(this).attr('id'),
 					}, settings.cancelButtonAttribs));
-			else
+			else {
 				cancelButton = $(this.fieldSettings.cancelButtonSelector).addClass('veditable-cancelButton');
+				$(this).on('hideEditControl', function(event) { $(cancelButton).hide(); });
+				$(this).on('showEditControl', function(event) { $(cancelButton).show(); });
+			}
 
 			var editButton;
 			if (!this.fieldSettings.editButtonSelector)
@@ -248,8 +270,11 @@
 						"class":	"veditable-editButton " + settings.editButtonClass,
 						"for":		$(this).attr('id'),
 					}, settings.editButtonAttribs));
-			else
+			else {
 				editButton = $(this.fieldSettings.editButtonSelector).addClass('veditable-editButton');
+				$(this).on('hideEditControl', function(event) { $(editButton).show(); });
+				$(this).on('showEditControl', function(event) { $(editButton).hide(); });
+			}
 
 			if($('label[for="' + $(this).attr('id') + '"]:not([veditable-editonly-element])').length)
 				var viewLabel = $('<label>')
@@ -344,10 +369,16 @@
 				$(viewPanel).show()
 				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 			});
+			
+			$(this).on('change', function() {
+				viewControl.trigger({type: 'updateViewControl', editElement: $(baseObject)});
+			})
 
 			return this;
 		});
 		
 		$(this).trigger('initComplete');
 	};
+	
+	
 }(jQuery));

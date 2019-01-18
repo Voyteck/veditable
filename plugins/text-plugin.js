@@ -27,11 +27,10 @@
 		var viewControl		= $('<' + object.fieldSettings.ViewTag + '>', $.extend({
 		}, settings.textViewAttribs));
 
-		$(viewControl).bind('updateViewControl', function(event) {
+		$(viewControl).on('updateViewControl', function(event) {
 			$(this).text(event.editElement.val());
 		});
-
-
+		
 		return viewControl;
 	}
 
