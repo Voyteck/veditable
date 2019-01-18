@@ -272,8 +272,8 @@
 					}, settings.editButtonAttribs));
 			else {
 				editButton = $(this.fieldSettings.editButtonSelector).addClass('veditable-editButton');
-				$(this).on('hideEditControl', function(event) { $(editButton).show(); });
-				$(this).on('showEditControl', function(event) { $(editButton).hide(); });
+				$(this).on('hideViewControl', function(event) { $(cancelButton).hide(); });
+				$(this).on('showViewControl', function(event) { $(cancelButton).show(); });
 			}
 
 			if($('label[for="' + $(this).attr('id') + '"]:not([veditable-editonly-element])').length)
