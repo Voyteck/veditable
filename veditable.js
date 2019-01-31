@@ -22,7 +22,7 @@
  * custom edit fields.
  *
  * Events:
- * 		performAjaxCall(event)		performs ajax call
+ * 		ajaxCall(event)		performs ajax call
  * 									normally rather used to be triggered, however can be reprogrammed as needed
  * 			event.ajax				allows to set additional $.ajax() config options - will be merged
  * 									using $.extend(true, settings[ajax], event.ajax) with standard settings for field
@@ -115,7 +115,7 @@
 				console.log('Setting ' + settingName + ' is not valid or cannot be read during runtime (is initialization-only option)');
 			}
 			return this.getAttrOrSetting(object, this.runtimeSettingsBindings[settingName].attrName, elementType, settings,this.runtimeSettingsBindings[settingName].settingKey);
-		}
+		},
 
 	};
 
@@ -183,7 +183,7 @@
 
 			var viewControlCallback = $.veditable.getViewControl(editType);
 
-			$(baseObject).on('performAjaxCall', function(event) {
+			$(baseObject).on('ajaxCall', function(event) {
 				// no callback function - standard ajax call handling
 				if (event.ajax !== undefined)
 					$.extend(true, settings['ajax'], event.ajax);
@@ -207,6 +207,7 @@
 					.done(function(data) {
 						$(viewControl)
 							.trigger({type: 'updateViewControl', editElement: $(baseObject)});
+						$(baseObject).trigger('ajaxDone');
 					});
 			});
 
@@ -235,7 +236,6 @@
 
 			if (! $.isFunction(viewControl.getValue))
 				viewControl.getValue = function() { return $(baseObject).val(); }
-
 			
 			var okButton;
 			if (this.fieldSettings.okButtonSelector === false)
@@ -324,20 +324,29 @@
 				.addClass('veditable-editPanel')
 				.hide();
 			$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
-
-			editButton.click(function() {
+			
+			$(baseObject).on('turnEditMode', function() {
 				$(viewPanel).hide();
 				$(baseObject).trigger({type: 'hideViewControl', viewElement: $(viewPanel)});
-
-				oldValue = $(baseObject).val();
-
 				$(editPanel).show();
 				$(baseObject).trigger({type: 'showEditControl', editElement: $(editPanel)});
 			});
-
-			okButton.click(function() {
+			
+			$(baseObject).on('turnViewMode', function() {
 				$(editPanel).hide();
 				$(baseObject).trigger({type: 'hideEditControl', editElement: $(editPanel)});
+				$(viewPanel).show();
+				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
+			});
+
+			editButton.click(function() {
+				$(baseObject).trigger('turnEditMode');
+
+				oldValue = $(baseObject).val();
+			});
+
+			okButton.click(function() {
+				$(baseObject).trigger('turnViewMode');
 
 				callbackFunction = baseObject.fieldSettings.okCallback;
 				if ($.isFunction(callbackFunction) || $.isFunction(window[callbackFunction])) {
@@ -351,11 +360,9 @@
 					// $('.veditable-viewControl[for="' + fieldName + '"]').trigger({type: 'updateViewControl', editElement: $('#' + fieldName)});
 				}
 				else {
-					$(baseObject).trigger('performAjaxCall');
+					$(baseObject).trigger('ajaxCall');
 				}
 
-				$(viewPanel).show();
-				$(baseObject).trigger({type: 'showViewControl', viewElement: $(viewPanel)});
 			});
 
 			cancelButton.click(function() {
@@ -378,6 +385,8 @@
 		});
 		
 		$(this).trigger('initComplete');
+		
+		return this;
 	};
 	
 	
