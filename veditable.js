@@ -151,7 +151,7 @@
 			var settings = {};
 
 			var editType = $(this).attr('type');
-			if (editType == 'hidden' && $(this).attr('veditable-edit-type') !== undefined && $(this).attr('veditable-edit-type') != '')
+			if ($(this).attr('veditable-edit-type') !== undefined && $(this).attr('veditable-edit-type') != '')
 				editType = $(this).attr('veditable-edit-type');
 
 			if (!$.veditable.pluginExists(editType))
