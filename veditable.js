@@ -243,6 +243,7 @@
 					$('<' + settings.okButtonTag + '>', $.extend({
 						"class": 	"veditable-okButton " + settings.okButtonClass,
 						"for":		$(this).attr('id'),
+						"type":		"button",
 					}, settings.okButtonAttribs));
 			else {
 				okButton = $(this.fieldSettings.okButtonSelector).addClass('veditable-okButton');
@@ -256,6 +257,7 @@
 					$('<' + settings.cancelButtonTag + '>', $.extend({
 						"class":	"veditable-cancelButton " + settings.cancelButtonClass,
 						"for":		$(this).attr('id'),
+						"type":		"button",
 					}, settings.cancelButtonAttribs));
 			else {
 				cancelButton = $(this.fieldSettings.cancelButtonSelector).addClass('veditable-cancelButton');
@@ -269,6 +271,7 @@
 					$('<' + settings.editButtonTag + '>', $.extend({
 						"class":	"veditable-editButton " + settings.editButtonClass,
 						"for":		$(this).attr('id'),
+						"type":		"button",
 					}, settings.editButtonAttribs));
 			else {
 				editButton = $(this.fieldSettings.editButtonSelector).addClass('veditable-editButton');
