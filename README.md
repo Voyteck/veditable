@@ -1,4 +1,7 @@
 # veditable
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ae641dee7a8545329bdf130ce82ec0c9)](https://app.codacy.com/app/Voyteck/veditable?utm_source=github.com&utm_medium=referral&utm_content=Voyteck/veditable&utm_campaign=Badge_Grade_Dashboard)
+
 VEditable - JQuery Inline Editing Plugin
 
 Plugin uses various INPUT tags (or other - depending on which plugin is used) to create inline editing controls. As default plugin will create the appropriate panel that will include the value of the field together with edit button, as well as will encapsulate the field editing control within another panel and add the OK/Cancel buttons. Plugin also implements sending the values using AJAX transations directly to backend for processing.
