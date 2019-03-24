@@ -18,22 +18,22 @@
 (function($) {
 
 	var pluginSettings = {
-		textViewTag:				'span',
-		textViewClass:				'',
+		textViewTag:				"span",
+		textViewClass:				"",
 		textViewAttribs:			{},
 	};
 
 	var viewControlCallback = function(object, settings) {
-		var viewControl		= $('<' + object.fieldSettings.ViewTag + '>', $.extend({
+		var viewControl		= $("<" + object.fieldSettings.ViewTag + ">", $.extend({
 		}, settings.textViewAttribs));
 
-		$(viewControl).on('updateViewControl', function(event) {
+		$(viewControl).on("updateViewControl", function(event) {
 			$(this).text(event.editElement.val());
 		});
 		
 		return viewControl;
 	};
 
-	$.veditable.addPlugin('text', pluginSettings, viewControlCallback);
+	$.veditable.addPlugin("text", pluginSettings, viewControlCallback);
 
 }(jQuery));

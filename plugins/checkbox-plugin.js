@@ -17,8 +17,8 @@
 (function($) {
 
 	var pluginSettings = {
-		checkboxViewTag:			'input',
-		checkboxViewClass:			'',
+		checkboxViewTag:			"input",
+		checkboxViewClass:			"",
 		checkboxViewAttribs:		{
 										"type":		"checkbox",
 										"disabled":	"true"
@@ -26,19 +26,19 @@
 	};
 
 	var viewControlCallback = function(object, settings) {
-		var viewControl		= $('<' + object.fieldSettings.ViewTag + '>', $.extend({
+		var viewControl		= $("<" + object.fieldSettings.ViewTag + ">", $.extend({
 		}, settings.checkboxViewAttribs))
-//			.attr('id', "veditable-viewControl-" + $(object).attr('id'));
+//			.attr("id", "veditable-viewControl-" + $(object).attr("id"));
 
-		$(viewControl).bind('updateViewControl', function(event) {
-			$(this).prop('checked', event.editElement.prop('checked'));
+		$(viewControl).bind("updateViewControl", function(event) {
+			$(this).prop("checked", event.editElement.prop("checked"));
 		});
 
-		viewControl.getValue = function(editElement) { return $(editElement).prop('checked') };
+		viewControl.getValue = function(editElement) { return $(editElement).prop("checked"); };
 
 		return viewControl;
 	};
 
-	$.veditable.addPlugin('checkbox', pluginSettings, viewControlCallback);
+	$.veditable.addPlugin("checkbox", pluginSettings, viewControlCallback);
 
 }(jQuery));

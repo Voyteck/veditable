@@ -20,39 +20,38 @@
 (function($) {
 
 	var pluginSettings = {
-		checkgroupViewTag:			'span',
-		checkgroupViewClass:		'',
+		checkgroupViewTag:			"span",
+		checkgroupViewClass:		"",
 		checkgroupViewAttribs:		{},
 		checkgroupEditPanelID:		{},
 	};
 
 	var viewControlCallback = function(object, settings) {
 
-		var viewControl		= $('<' + object.fieldSettings.ViewTag + '>', $.extend({
+		var viewControl		= $("<" + object.fieldSettings.ViewTag + ">", $.extend({
 		}, settings.checkgroupViewAttribs));
 
-		var editPanelCheckboxes = $('#' + object.fieldSettings.EditPanelID + ' input[type="checkbox"]');
+		var editPanelCheckboxes = $("#" + object.fieldSettings.EditPanelID + " input[type=\"checkbox\"]");
 
-		$(viewControl).bind('updateViewControl', function(event) {
-			var textValue = '';
+		$(viewControl).bind("updateViewControl", function(event) {
+			var textValue = "";
 			editPanelCheckboxes.each(function() {
-				if ($(this).prop('checked'))
-					textValue += ' ' + $(this).attr('id');
+				if ($(this).prop("checked"))
+					textValue += " " + $(this).attr("id");
 			});
 			$(this).html(textValue);
 		});
 
-		$(viewControl).bind('updateEditControl', function(event) {
+		$(viewControl).bind("updateEditControl", function(event) {
 			editPanelCheckboxes.each(function() {
-				$(this).prop('checked', ((parseInt($(event.viewElement).val(), 10) & parseInt($(this).val())) === parseInt($(this).val(), 10)));
+				$(this).prop("checked", ((parseInt($(event.viewElement).val(), 10) & parseInt($(this).val(), 10)) === parseInt($(this).val(), 10)));
 			});
 		});
 
 		viewControl.getValue = function(editElement) {
 			var intValue = 0;
 			editPanelCheckboxes.each(function() {
-				if ($(this).prop('checked'))
-					intValue += parseInt($(this).val(), 10);
+				if ($(this).prop("checked")) { intValue += parseInt($(this).val(), 10); }
 			});
 			return intValue ;
 		};
@@ -61,6 +60,6 @@
 
 	};
 
-	$.veditable.addPlugin('checkgroup', pluginSettings, viewControlCallback);
+	$.veditable.addPlugin("checkgroup", pluginSettings, viewControlCallback);
 
 }(jQuery));
