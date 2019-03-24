@@ -75,7 +75,7 @@
 
 		getAttrOrSetting: function (object, attrName, elementType, settingsArray, settingKey, errConsole) {
 			// checking if defined on tag level
-			if ($(object).attr(attrName) !== undefined && $(object).attr(attrName) != '')
+			if ($(object).attr(attrName) !== undefined && $(object).attr(attrName) !== '')
 				return $(object).attr(attrName);
 
 			// checking if defined on fields configuration level
@@ -85,12 +85,12 @@
 			}
 
 			// checking if defined on fieldtype level (e.g. top level config, textViewTag - potentially can be also set on plugin settings passed to $.veditable.addPlugin(...)
-			if (settingsArray[elementType + settingKey] !== undefined && settingsArray[elementType + settingKey] != '') {
+			if (settingsArray[elementType + settingKey] !== undefined && settingsArray[elementType + settingKey] !== '') {
 				var fieldtypeSettingValue 	= settingsArray[elementType + settingKey];
 				return fieldtypeSettingValue;
 			}
 
-			if (settingsArray[settingKey] !== undefined && settingsArray[settingKey] != '') {
+			if (settingsArray[settingKey] !== undefined && settingsArray[settingKey] !== '') {
 				var defaultSettingValue = settingsArray[settingKey];
 				return defaultSettingValue;
 			}

@@ -44,7 +44,7 @@
 
 		$(viewControl).bind('updateEditControl', function(event) {
 			editPanelCheckboxes.each(function() {
-				$(this).prop('checked', ((parseInt($(event.viewElement).val()) & parseInt($(this).val())) == parseInt($(this).val())));
+				$(this).prop('checked', ((parseInt($(event.viewElement).val(), 10) & parseInt($(this).val())) === parseInt($(this).val(), 10)));
 			});
 		});
 
@@ -52,7 +52,7 @@
 			var intValue = 0;
 			editPanelCheckboxes.each(function() {
 				if ($(this).prop('checked'))
-					intValue += parseInt($(this).val());
+					intValue += parseInt($(this).val(), 10);
 			});
 			return intValue ;
 		};

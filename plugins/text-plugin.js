@@ -32,7 +32,7 @@
 		});
 		
 		return viewControl;
-	}
+	};
 
 	$.veditable.addPlugin('text', pluginSettings, viewControlCallback);
 
