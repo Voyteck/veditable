@@ -75,7 +75,7 @@
 
 		getAttrOrSetting(object, attrName, elementType, settingsArray, settingKey, errConsole) {
 			// checking if defined on tag level
-			if ($(object).attr(attrName) !== undefined && $(object).attr(attrName) !== "")
+			if (typeof $(object).attr(attrName) !== "undefined" && $(object).attr(attrName) !== "")
 				return $(object).attr(attrName);
 
 			// checking if defined on fields configuration level
@@ -85,7 +85,7 @@
 			}
 
 			// checking if defined on fieldtype level (e.g. top level config, textViewTag - potentially can be also set on plugin settings passed to $.veditable.addPlugin(...)
-			if (settingsArray[elementType + settingKey] !== undefined && settingsArray[elementType + settingKey] !== "") {
+			if (typeof settingsArray[elementType + settingKey] !== "undefined" && settingsArray[elementType + settingKey] !== "") {
 				var fieldtypeSettingValue 	= settingsArray[elementType + settingKey];
 				return fieldtypeSettingValue;
 			}
@@ -111,7 +111,7 @@
 		},
 		
 		getFieldSetting(object, settingName, elementType, settings) {
-			if (this.runtimeSettingsBindings[settingName] === undefined) {
+			if (typeof this.runtimeSettingsBindings[settingName] === "undefined") {
 				console.log("Setting " + settingName + " is not valid or cannot be read during runtime (is initialization-only option)");
 			}
 			return this.getAttrOrSetting(object, this.runtimeSettingsBindings[settingName].attrName, elementType, settings,this.runtimeSettingsBindings[settingName].settingKey);
@@ -151,7 +151,7 @@
 			var settings = {};
 
 			var editType = $(this).attr("type");
-			if (typeof $(this).attr("veditable-edit-type") !== "undefined" && $(this).attr("veditable-edit-type") != "")
+			if (typeof $(this).attr("veditable-edit-type") !== "undefined" && $(this).attr("veditable-edit-type") !== "")
 				editType = $(this).attr("veditable-edit-type");
 
 			if (!$.veditable.pluginExists(editType))
@@ -184,27 +184,26 @@
 			var viewControlCallback = $.veditable.getViewControl(editType);
 			
 			if (!viewControlCallback) {
-				console.log("VEditable ERROR: No correct type specified or not type specified for control: ");
-				console.log(this);
+				console.log("VEditable ERROR: No correct type specified or not type specified for control: ", this);
 				return true; // goes to next element
 			}
-			else {
-				var viewControl = viewControlCallback(this, settings);
+			
+			var viewControl = viewControlCallback(this, settings);
 
-				var viewCallbackFunction = this.fieldSettings["viewCallback"];
-				if ($.isFunction(viewCallbackFunction) || $.isFunction(window[viewCallbackFunction])) {
-					$(viewControl).off("updateViewControl");
-					if($.isFunction(viewCallbackFunction))
-						$(viewControl).on("updateViewControl", function(event) { $(this).html(viewCallbackFunction(event)); });
-					if($.isFunction(window[viewCallbackFunction]))
-						$(viewControl).on("updateViewControl", function(event) { $(this).html(window[viewCallbackFunction](event)); });
-				}
-
-				$(viewControl)
-					.attr("id", "veditable-viewControl-" + $(this).attr("id"))
-					.trigger({type: "updateEditControl", viewElement: $(baseObject)})
-					.trigger({type: "updateViewControl", editElement: $(baseObject)})
+			var viewCallbackFunction = this.fieldSettings["viewCallback"];
+			if ($.isFunction(viewCallbackFunction) || $.isFunction(window[viewCallbackFunction])) {
+				$(viewControl).off("updateViewControl");
+				if($.isFunction(viewCallbackFunction))
+					$(viewControl).on("updateViewControl", function(event) { $(this).html(viewCallbackFunction(event)); });
+				if($.isFunction(window[viewCallbackFunction]))
+					$(viewControl).on("updateViewControl", function(event) { $(this).html(window[viewCallbackFunction](event)); });
 			}
+
+			$(viewControl)
+				.attr("id", "veditable-viewControl-" + $(this).attr("id"))
+				.trigger({type: "updateEditControl", viewElement: $(baseObject)})
+				.trigger({type: "updateViewControl", editElement: $(baseObject)});
+		
 
 			$(baseObject).on("ajaxCall", function(event) {
 				// no callback function - standard ajax call handling
@@ -303,18 +302,20 @@
 
 
 			var editPanelLabel = $("label[for=\"" + $(this).attr("id") + "\"]").detach();
-			if ($(this).attr("veditable-edit-panel-id") !== undefined) {
-				var editPanelSearchString = "#" + $(this).attr("veditable-edit-panel-id");
-				var editPanel = $(editPanelSearchString).append(this);
+			var editPanelSearchString = "";
+			var editPanel = null;
+			if (typeof $(this).attr("veditable-edit-panel-id") !== "undefined") {
+				editPanelSearchString = "#" + $(this).attr("veditable-edit-panel-id");
+				editPanel = $(editPanelSearchString).append(this);
 				if (this.fieldSettings.cancelButtonSelector === false)
 					editPanel.append(cancelButton);
 				if (this.fieldSettings.okButtonSelector === false)
 					editPanel.append(okButton);
 			}
 			else {
-				var editPanel = $("<span>")
+				editPanel = $("<span>")
 					.attr("id", "veditable-editPanel-" + $(this).attr("id"));
-				var editPanelSearchString = "span#veditable-editPanel-" + $(this).attr("id");
+				editPanelSearchString = "span#veditable-editPanel-" + $(this).attr("id");
 				$(this).wrap(editPanel);
 				if (this.fieldSettings.cancelButtonSelector === false)
 					$(this).after(cancelButton);
@@ -341,7 +342,8 @@
 				$(viewPanel).show();
 				$(baseObject).trigger({type: "showViewControl", viewElement: $(viewPanel)});
 			});
-
+			
+			var oldValue = null;
 			editButton.click(function() {
 				$(baseObject).trigger("turnEditMode");
 
@@ -351,7 +353,7 @@
 			okButton.click(function() {
 				$(baseObject).trigger("turnViewMode");
 
-				callbackFunction = baseObject.fieldSettings.okCallback;
+				var callbackFunction = baseObject.fieldSettings.okCallback;
 				if ($.isFunction(callbackFunction) || $.isFunction(window[callbackFunction])) {
 					// callback function is doing everything
 					if($.isFunction(callbackFunction))
@@ -382,7 +384,7 @@
 			
 			$(this).on("change", function() {
 				viewControl.trigger({type: "updateViewControl", editElement: $(baseObject)});
-			})
+			});
 
 			return this;
 		});
