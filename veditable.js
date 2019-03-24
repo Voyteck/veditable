@@ -53,8 +53,8 @@
 		plugins: {},
 		addPlugin(pluginName, pluginSettings, viewControlCallback) {
 			this["plugins"][pluginName] = {
-				"pluginSettings": pluginSettings,
-				"viewControlCallback": viewControlCallback,
+				pluginSettings,
+				viewControlCallback,
 			};
 		},
 		pluginExists(pluginName) {
@@ -277,14 +277,14 @@
 				$(this).on("hideViewControl", function(event) { $(cancelButton).hide(); });
 				$(this).on("showViewControl", function(event) { $(cancelButton).show(); });
 			}
-
+			
+			var viewLabel = $( "" );
 			if($("label[for=\"" + $(this).attr("id") + "\"]:not([veditable-editonly-element])").length)
-				var viewLabel = $("<label>")
+				viewLabel = $("<label>")
 					.attr("for", "veditable-viewControl-" + $(this).attr("id"))
 					.addClass("veditable-viewControl-label " + $("label[for=\"" + $(this).attr("id") + "\"]").attr("class"))
 					.html($("label[for=\"" + $(this).attr("id") + "\"]").html());
-			else
-				var viewLabel = $( "" );
+				
 
 			$(viewControl)
 				.attr("for", $(this).attr("id"))
@@ -378,7 +378,7 @@
 				// TODO: Works incorrectly for checkbox - should also be done via triggered event
 				$(viewControl).trigger({type: "updateEditControl", viewElement: $(viewControl)});
 
-				$(viewPanel).show()
+				$(viewPanel).show();
 				$(baseObject).trigger({type: "showViewControl", viewElement: $(viewPanel)});
 			});
 			

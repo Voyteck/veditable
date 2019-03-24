@@ -27,8 +27,7 @@
 
 	var viewControlCallback = function(object, settings) {
 		var viewControl		= $("<" + object.fieldSettings.ViewTag + ">", $.extend({
-		}, settings.checkboxViewAttribs))
-//			.attr("id", "veditable-viewControl-" + $(object).attr("id"));
+		}, settings.checkboxViewAttribs));
 
 		$(viewControl).bind("updateViewControl", function(event) {
 			$(this).prop("checked", event.editElement.prop("checked"));
